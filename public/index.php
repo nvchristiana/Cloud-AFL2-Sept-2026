@@ -3,14 +3,12 @@ require_once __DIR__ . '/firebase_config.php';
 
 $dbRef = $database->getReference('popmart_items');
 
-// --- DELETE DATA ---
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['key'])) {
     $dbRef->getChild($_GET['key'])->remove();
     header('Location: index.php');
     exit;
 }
 
-// --- CREATE & UPDATE DATA ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $key = $_POST['keyId'] ?? '';
     $payload = [
@@ -31,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// --- READ DATA ---
 $snapshot = $dbRef->getSnapshot();
 $items = $snapshot->getValue() ?? [];
 
@@ -48,7 +45,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['key']))
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PopMart VIP Inventory (PHP)</title>
+  <title>PopMart VIP Inventory</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
@@ -91,10 +88,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['key']))
   <div class="container main-card p-4 p-md-5 my-auto" style="max-width: 950px;">
     <div class="text-center mb-4">
       <h2 class="fw-bold" style="color: var(--sage-dark);">POPMART VIP</h2>
-      <p class="text-muted small">Inventory Management System (PHP Server-Side)</p>
+      <p class="text-muted small">Inventory Management System</p>
     </div>
     
-    <!-- FORM INPUT -->
     <form action="index.php" method="POST" class="row g-3">
       <input type="hidden" name="keyId" value="<?= htmlspecialchars($editKey) ?>">
       
@@ -142,7 +138,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['key']))
 
     <hr class="my-4 text-secondary">
 
-    <!-- DATA TABLE -->
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead class="table-custom-dark">
