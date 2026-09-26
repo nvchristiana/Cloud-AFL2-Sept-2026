@@ -1,4 +1,10 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
 require_once __DIR__ . '/firebase_config.php';
 
 $dbRef = $database->getReference('popmart_items');
@@ -86,9 +92,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['key']))
 <body class="p-3 p-md-5">
 
   <div class="container main-card p-4 p-md-5 my-auto" style="max-width: 950px;">
-    <div class="text-center mb-4">
-      <h2 class="fw-bold" style="color: var(--sage-dark);">POPMART VIP</h2>
-      <p class="text-muted small">Inventory Management System</p>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h2 class="fw-bold m-0" style="color: var(--sage-dark);">POPMART VIP</h2>
+        <p class="text-muted small m-0">Inventory Management System</p>
+      </div>
+      <a href="logout.php" class="btn btn-outline-danger btn-sm px-3">Logout</a>
     </div>
     
     <form action="index.php" method="POST" class="row g-3">
