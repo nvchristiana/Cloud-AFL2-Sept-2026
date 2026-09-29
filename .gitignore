@@ -1,3 +1,7 @@
 /vendor/
 /src/firebase_credentials.json
 .DS_Store
+Thumbs.db
+*.mp4
+.env
+.vscode/
