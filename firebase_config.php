@@ -9,6 +9,9 @@ $envCreds = $_ENV['FIREBASE_CREDENTIALS'] ?? $_SERVER['FIREBASE_CREDENTIALS'] ??
 
 if ($envCreds) {
     $credentials = json_decode($envCreds, true);
+    if (!$credentials) {
+        $credentials = json_decode(base64_decode($envCreds), true);
+    }
     if (is_array($credentials) && isset($credentials['private_key'])) {
         $credentials['private_key'] = str_replace('\n', "\n", $credentials['private_key']);
     }
