@@ -5,19 +5,14 @@ use Kreait\Firebase\Factory;
 
 $factory = (new Factory);
 
-$rawEnv = getenv('FIREBASE_CREDENTIALS') ?: ($_ENV['FIREBASE_CREDENTIALS'] ?? $_SERVER['FIREBASE_CREDENTIALS'] ?? null);
+$b64 = getenv('FIREBASE_CREDENTIALS_B64') ?: ($_ENV['FIREBASE_CREDENTIALS_B64'] ?? null);
 
-if ($rawEnv) {
-    $credentials = json_decode($rawEnv, true);
+if ($b64) {
+    $credentials = json_decode(base64_decode($b64), true);
     if (!is_array($credentials)) {
-        $credentials = json_decode(base64_decode($rawEnv), true);
+        die("Invalid configuration.");
     }
-    if (is_array($credentials) && isset($credentials['private_key'])) {
-        $credentials['private_key'] = str_replace(["\\n", '\n'], "\n", $credentials['private_key']);
-    }
-    if (is_array($credentials)) {
-        $factory = $factory->withServiceAccount($credentials);
-    }
+    $factory = $factory->withServiceAccount($credentials);
 } else {
     $factory = $factory->withServiceAccount(__DIR__ . '/src/firebase_credentials.json');
 }
