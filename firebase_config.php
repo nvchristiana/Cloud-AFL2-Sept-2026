@@ -5,8 +5,10 @@ use Kreait\Firebase\Factory;
 
 $factory = (new Factory);
 
-if (getenv('FIREBASE_CREDENTIALS')) {
-    $credentials = json_decode(getenv('FIREBASE_CREDENTIALS'), true);
+$envCreds = $_ENV['FIREBASE_CREDENTIALS'] ?? $_SERVER['FIREBASE_CREDENTIALS'] ?? getenv('FIREBASE_CREDENTIALS');
+
+if ($envCreds) {
+    $credentials = json_decode($envCreds, true);
     if (is_array($credentials) && isset($credentials['private_key'])) {
         $credentials['private_key'] = str_replace('\n', "\n", $credentials['private_key']);
     }
