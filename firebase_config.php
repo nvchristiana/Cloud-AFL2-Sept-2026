@@ -7,6 +7,9 @@ $factory = (new Factory);
 
 if (getenv('FIREBASE_CREDENTIALS')) {
     $credentials = json_decode(getenv('FIREBASE_CREDENTIALS'), true);
+    if (is_array($credentials) && isset($credentials['private_key'])) {
+        $credentials['private_key'] = str_replace('\n', "\n", $credentials['private_key']);
+    }
     $factory = $factory->withServiceAccount($credentials);
 } else {
     $factory = $factory->withServiceAccount(__DIR__ . '/src/firebase_credentials.json');
