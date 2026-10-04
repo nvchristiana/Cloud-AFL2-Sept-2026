@@ -6,13 +6,25 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
 
     if (!empty($email) && !empty($password)) {
         try {
-            $user = $auth->createUserWithEmailAndPassword($email, $password);
-            $success = "Account created successfully! You can now login.";
+            $auth->createUserWithEmailAndPassword($email, $password);
+
+            $actionCodeSettings = [
+                'continueUrl' => 'https://cloud-afl2-sept-2026-production.up.railway.app/verify.php?email=' . urlencode($email),
+                'handleCodeInApp' => false,
+            ];
+            $auth->sendEmailVerificationLink($email, $actionCodeSettings);
+
+            $database->getReference('users/' . md5($email))->set([
+                'email' => $email,
+                'is_verified' => false,
+            ]);
+
+            $success = "Registration successful! Please check your email to verify your account.";
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
@@ -21,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

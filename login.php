@@ -3,26 +3,59 @@ session_start();
 require_once __DIR__ . '/firebase_config.php';
 
 $error = '';
+$success = '';
+
+if (isset($_GET['verified'])) {
+    $success = "Email verified successfully! Please login.";
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
 
     if (!empty($email) && !empty($password)) {
+        $user = null;
+
         try {
-            $signInResult = $auth->signInWithEmailAndPassword($email, $password);
-            $_SESSION['user_id'] = $signInResult->firebaseUserId();
-            header('Location: index.php');
-            exit;
+            $user = $auth->getUserByEmail($email);
+        } catch (\Kreait\Firebase\Exception\Auth\UserNotFound $e) {
+            $error = "Account not found.";
         } catch (\Throwable $e) {
-            $error = "Login failed: " . $e->getMessage();
+            $error = "Something went wrong. Please try again.";
+        }
+
+        if ($user) {
+            $signInResult = null;
+
+            try {
+                $signInResult = $auth->signInWithEmailAndPassword($email, $password);
+            } catch (\Throwable $e) {
+                $error = "Incorrect password.";
+            }
+
+            if ($signInResult) {
+                $userRef = $database->getReference('users/' . md5($email));
+                $isVerified = ($userRef->getChild('is_verified')->getValue() === true);
+
+                if (!$isVerified && $user->emailVerified) {
+                    $userRef->set(['email' => $email, 'is_verified' => true]);
+                    $isVerified = true;
+                }
+
+                if ($isVerified) {
+                    $_SESSION['user_id'] = $signInResult->firebaseUserId();
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    $error = "Your email is not verified yet. Please check your inbox.";
+                }
+            }
         }
     } else {
         $error = "Please fill in all fields.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,6 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php if ($error): ?>
       <div class="alert alert-danger py-2 small" role="alert"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
+    <?php if ($success): ?>
+      <div class="alert alert-success py-2 small" role="alert"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
     <form action="login.php" method="POST">
